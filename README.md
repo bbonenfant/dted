@@ -142,9 +142,9 @@ This will attempt to create an ASCII representation of the DTED file within
   terminal window or zooming out your terminal window will increase the 
   resolution of the chart:
   
-![Normal Resolution](.images/normal_resolution.png)
+![Normal Resolution Image](.images/normal_resolution.png)
 
-![High Resolution](.images/high_resolution.png)
+![High Resolution Image](.images/high_resolution.png)
 
 Why did I add this feature? Why not?
 
