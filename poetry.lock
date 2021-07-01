@@ -319,7 +319,7 @@ version = "3.10.0.0"
 [[package]]
 category = "main"
 description = "Backport of pathlib-compatible object wrapper for zip files"
-marker = "python_version >= \"3.6\" and python_version < \"3.8\" or python_version < \"3.8\" or python_version >= \"3.6\" and python_version < \"3.8\" and (python_version >= \"3.6\" and python_version < \"3.8\" or python_version < \"3.8\")"
+marker = "python_version >= \"3.6\" and python_version < \"3.8\" or python_version < \"3.8\""
 name = "zipp"
 optional = false
 python-versions = ">=3.6"
