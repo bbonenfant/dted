@@ -1,0 +1,11 @@
+.DS_Store
+.env
+.python-version
+.idea
+.mypy_cache
+.pytest_cache
+.venv
+__pycache__
+*.egg-info
+data
+!test/data
