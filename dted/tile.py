@@ -13,74 +13,74 @@ from .latlon import LatLon
 from .records import AccuracyDescription, DataSetIdentification, UserHeaderLabel
 
 _FilePath = Union[str, Path]
-_DATA_SENTINEL = 0xaa
+_DATA_SENTINEL = 0xAA
 
 
 class Tile:
     # noinspection PyUnresolvedReferences
-    """ An API for accessing data within a DTED file.
+    """An API for accessing data within a DTED file.
 
-        When this class is initialized with a path to a DTED file, the metadata records
-          associated with the DTED file will always parsed and the terrain elevation data
-          will optionally be parsed (defaults to being parsed).
+    When this class is initialized with a path to a DTED file, the metadata records
+      associated with the DTED file will always parsed and the terrain elevation data
+      will optionally be parsed (defaults to being parsed).
 
-        By not loading all of the terrain elevation data into memory, you can quickly
-          perform elevation lookups on raw files.
+    By not loading all of the terrain elevation data into memory, you can quickly
+      perform elevation lookups on raw files.
 
-        Attributes:
-            file: The path to the DTED file.
-            uhl: Parsed User Header Label (UHL) record from the DTED file.
-            dsi: Parsed Data Set Identification (DSI) record from the DTED file.
-            acc: Parsed Accuracy Description (ACC) record from the DTED file.
-            data: The (optionally loaded) raw terrain elevation data from the DTED file.
+    Attributes:
+        file: The path to the DTED file.
+        uhl: Parsed User Header Label (UHL) record from the DTED file.
+        dsi: Parsed Data Set Identification (DSI) record from the DTED file.
+        acc: Parsed Accuracy Description (ACC) record from the DTED file.
+        data: The (optionally loaded) raw terrain elevation data from the DTED file.
 
-        Methods:
-            get_elevation: Lookup the terrain elevation at a particular location.
-                Data does not need to be loaded into memory to perform this operation.
-            load_data: Load the terrain elevation data into memory from the DTED file.
-                Note: by default this is done automatically during class initialization.
-            __contains__: Check whether a LatLon point is contained within the DTED file.
+    Methods:
+        get_elevation: Lookup the terrain elevation at a particular location.
+            Data does not need to be loaded into memory to perform this operation.
+        load_data: Load the terrain elevation data into memory from the DTED file.
+            Note: by default this is done automatically during class initialization.
+        __contains__: Check whether a LatLon point is contained within the DTED file.
 
-        Examples:
+    Examples:
 
-            Access metadata within a DTED file.
-            >>> from dted import Tile
-            >>> dted_file: Path
-            >>> tile = Tile(dted_file)
-            >>> tile.dsi.origin
-            LatLon(latitude=41.0, longitude=-71.0)
+        Access metadata within a DTED file.
+        >>> from dted import Tile
+        >>> dted_file: Path
+        >>> tile = Tile(dted_file)
+        >>> tile.dsi.origin
+        LatLon(latitude=41.0, longitude=-71.0)
 
-            Read a DTED file and get the maximum terrain elevation
-            >>> from dted import Tile
-            >>> dted_file: Path
-            >>> tile = Tile(dted_file)
-            >>> tile.data.max()
-            125
+        Read a DTED file and get the maximum terrain elevation
+        >>> from dted import Tile
+        >>> dted_file: Path
+        >>> tile = Tile(dted_file)
+        >>> tile.data.max()
+        125
 
-            Quickly lookup terrain elevation at a specific location within a DTED file.
-            >>> from dted import LatLon, Tile
-            >>> dted_file: Path
-            >>> tile = Tile(dted_file, in_memory=False)
-            >>> tile.get_elevation(LatLon(latitude=41.36, longitude=-70.55))
-            -21
+        Quickly lookup terrain elevation at a specific location within a DTED file.
+        >>> from dted import LatLon, Tile
+        >>> dted_file: Path
+        >>> tile = Tile(dted_file, in_memory=False)
+        >>> tile.get_elevation(LatLon(latitude=41.36, longitude=-70.55))
+        -21
 
-            Check if location is covered by a DTED file.
-            >>> from dted import LatLon, Tile
-            >>> dted_file: Path
-            >>> tile = Tile(dted_file)
-            >>> LatLon(latitude=41.5, longitude=-70.25) in tile
-            True
+        Check if location is covered by a DTED file.
+        >>> from dted import LatLon, Tile
+        >>> dted_file: Path
+        >>> tile = Tile(dted_file)
+        >>> LatLon(latitude=41.5, longitude=-70.25) in tile
+        True
 
-            Load DTED data into memory fast with minimal checks.
-            >>> from dted import Tile
-            >>> dted_file: Path
-            >>> tile = Tile(dted_file, in_memory=False)
-            >>> tile.load_data(perform_checksum=False)
+        Load DTED data into memory fast with minimal checks.
+        >>> from dted import Tile
+        >>> dted_file: Path
+        >>> tile = Tile(dted_file, in_memory=False)
+        >>> tile.load_data(perform_checksum=False)
 
-        References:
-            SRTM DTED Specification:
-                https://www.dlr.de/eoc/Portaldata/60/Resources/dokumente/7_sat_miss/SRTM-XSAR-DEM-DTED-1.1.pdf
-        """
+    References:
+        SRTM DTED Specification:
+            https://www.dlr.de/eoc/Portaldata/60/Resources/dokumente/7_sat_miss/SRTM-XSAR-DEM-DTED-1.1.pdf
+    """
 
     def __init__(self, file: _FilePath, *, in_memory: bool = True):
         """
@@ -103,13 +103,13 @@ class Tile:
 
     @property
     def data(self) -> np.ndarray:
-        """ Access the elevation data, if it has been read into memory. """
+        """Access the elevation data, if it has been read into memory."""
         if self._data is not None:
             return self._data
         raise ValueError("Data not loaded into memory. ")
 
     def get_elevation(self, latlon: LatLon) -> float:
-        """ Lookup the terrain elevation at the specified location.
+        """Lookup the terrain elevation at the specified location.
 
         This will return the elevation of the explicitly defined DTED point
             nearest to the specified location.
@@ -118,15 +118,16 @@ class Tile:
             latlon: The location at which to lookup the terrain elevation.
 
         Raises:
-
+            NoElevationDataError: If the specified location is not contained within the
+                DTED file.
         """
         if latlon not in self:
             raise NoElevationDataError(
                 f"Specified location is not contained within DTED file: {latlon.format(1)}"
             )
 
-        origin_latitude, origin_longitude = astuple(self.uhl.origin)
-        lat_interval, lon_interval = self.uhl.latitude_interval, self.uhl.longitude_interval
+        origin_latitude, origin_longitude = astuple(self.dsi.origin)
+        lat_interval, lon_interval = self.dsi.latitude_interval, self.dsi.longitude_interval
         latitude_index = round((latlon.latitude - origin_latitude) * 3600 / lat_interval)
         longitude_index = round((latlon.longitude - origin_longitude) * 3600 / lon_interval)
 
@@ -141,7 +142,7 @@ class Tile:
             return data_block[latitude_index]
 
     def load_data(self, *, perform_checksum: bool = True) -> None:
-        """ Load the elevation data into memory.
+        """Load the elevation data into memory.
 
         This loaded elevation data can be accessed through the `self.data` attribute.
 
@@ -151,7 +152,7 @@ class Tile:
                 that the checksums be performed.
 
         Raises:
-            AssertionError: If a data block fails it's checksum.
+            InvalidFileError: If a data block fails it's checksum.
         """
 
         # Open the file, seek to the data blocks, and start parsing.
@@ -162,9 +163,10 @@ class Tile:
         block_length = self.dsi.data_block_length
         parsed_data_blocks = [
             _parse_data_block(
-                block=data_record[column * block_length:(column + 1) * block_length],
-                perform_checksum=perform_checksum
-            ) for column in range(self.uhl.shape[0])
+                block=data_record[column * block_length : (column + 1) * block_length],
+                perform_checksum=perform_checksum,
+            )
+            for column in range(self.dsi.shape[0])
         ]
         self._data = _convert_signed_magnitude(np.asarray(parsed_data_blocks))
 
@@ -178,7 +180,7 @@ class Tile:
             )
 
     def __contains__(self, item: LatLon) -> bool:
-        """ Determines whether a location is covered by the DTED file. """
+        """Determines whether a location is covered by the DTED file."""
         if not isinstance(item, LatLon):
             raise TypeError(f"Expected LatLon -- Found: {item}")
 
@@ -190,10 +192,23 @@ class Tile:
 
 
 def _parse_data_block(block: bytes, perform_checksum: bool) -> np.ndarray:
-    """ Parse an individual block of data. """
+    """Parse an individual block of data.
+
+    Args:
+        block: A single data block of raw binary data.
+        perform_checksum: Whether to perform the checksum verification.
+
+    Returns:
+        Parsed terrain elevation data as a numpy array. NOTE: This elevation is data
+          is _not_ converted from signed-magnitude representation. This is not done
+          in this step to optimize the file parsing.
+
+    Raises:
+        InvalidFileError: If the checksum fails verification or the data block is malformed.
+    """
     if perform_checksum:
         checksum = unpack(">i", block[-4:])[0]
-        sum_ = np.frombuffer(block[:-4], dtype='>B').sum()
+        sum_ = np.frombuffer(block[:-4], dtype=">B").sum()
         if sum_ != checksum:
             block_index = (_DATA_SENTINEL << 24) - unpack(">I", block[:4])[0]
             raise InvalidFileError(
@@ -206,11 +221,11 @@ def _parse_data_block(block: bytes, perform_checksum: bool) -> np.ndarray:
             f"Found: {block[0]}"
         )
 
-    return np.frombuffer(block[8:-4], dtype='>i2')
+    return np.frombuffer(block[8:-4], dtype=">i2")
 
 
 def _convert_signed_magnitude(data: np.ndarray) -> np.ndarray:
-    """ Converts a numpy array of binary 16 bit integers between
+    """Converts a numpy array of binary 16 bit integers between
     signed magnitude and 2's complement.
     """
     if not data.flags.writeable:

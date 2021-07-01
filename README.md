@@ -217,3 +217,8 @@ To run the tests:
 ```bash
 (.venv) user@machine$ pytest .
 ```
+
+If you are getting `BLACK` errors from pytest, run the `black` code formatter:
+```bash
+(.venv) user@machine$ black .
+```

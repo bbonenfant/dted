@@ -21,19 +21,20 @@ _DESCRIPTION = (
 
 
 def main() -> None:
-    """ Run the CLI. """
+    """Run the CLI."""
     parser = ArgumentParser(description=_DESCRIPTION)
     parser.formatter_class = RawTextHelpFormatter
     parser.add_argument("file", type=Path, help="Path to a DTED file. ")
     parser.add_argument(
-        "-l", "--location",
+        "-l",
+        "--location",
         type=float,
         nargs=2,
         metavar=("LATITUDE", "LONGITUDE"),
         help=(
             "Location at which to look up terrain elevation. \n"
             "Coordinate values are expected to be in decimal degrees. "
-        )
+        ),
     )
     parser.add_argument(
         "--display",
@@ -42,7 +43,7 @@ def main() -> None:
             "Display a low-resolution ASCII representation of a DTED file. \n"
             "This chart is scaled to fit within your terminal window, thereby \n"
             "the resolution can be increased by expanding your terminal window. "
-        )
+        ),
     )
     args = parser.parse_args()
 
@@ -70,7 +71,7 @@ def main() -> None:
 
 
 def generate_chart(tile: Tile) -> str:
-    """ Generate a low resolution heat map plot of the DTED tile from ASCII characters. """
+    """Generate a low resolution heat map plot of the DTED tile from ASCII characters."""
     # Load the terrain elevation data into memory and replace void values with 0.
     tile.load_data(perform_checksum=True)
     elevation_data = tile.data
@@ -78,10 +79,7 @@ def generate_chart(tile: Tile) -> str:
 
     # Determine the maximum height of the ASCII chart.
     terminal_size = os.get_terminal_size()
-    maximum_chart_height = min(
-        terminal_size.lines,
-        terminal_size.columns // 2,  # Terminal block widths are half their heights.
-    ) - 10  # Leave a buffer for a chart border and legend.
+    maximum_chart_height = min(terminal_size.lines, terminal_size.columns // 2) - 10
     if maximum_chart_height < 5:
         error(
             "Error displaying DTED file within the terminal. "
@@ -93,7 +91,7 @@ def generate_chart(tile: Tile) -> str:
     step = raw_block_count // max(
         factor for factor in factors(raw_block_count) if factor < maximum_chart_height
     )
-    sampled_data = tile.data.T[::-step, ::(step//2)]
+    sampled_data = tile.data.T[::-step, :: (step // 2)]
 
     # Bin the data into 5 equally spaced bins
     min_elevation, max_elevation = sampled_data.min(), sampled_data.max()
@@ -123,7 +121,7 @@ def generate_chart(tile: Tile) -> str:
 
 
 def generate_report(tile: Tile) -> str:
-    """ Generate a pretty-printed high-level report on the provided DTED tile. """
+    """Generate a pretty-printed high-level report on the provided DTED tile."""
     # Preformat some data.
     compilation_date = ""
     if tile.dsi.compilation_date is not None:
@@ -135,7 +133,7 @@ def generate_report(tile: Tile) -> str:
     ne = tile.dsi.north_east_corner.format(1)
     sw = tile.dsi.south_west_corner.format(1)
     se = tile.dsi.south_east_corner.format(1)
-    resolution = f"{tile.dsi.latitude_interval:.1f}\"/{tile.dsi.longitude_interval:.1f}\""
+    resolution = f'{tile.dsi.latitude_interval:.1f}"/{tile.dsi.longitude_interval:.1f}"'
     accuracy = f"{tile.acc.absolute_vertical}m/{tile.acc.absolute_horizontal}m"
 
     # Generate the report.
@@ -167,19 +165,18 @@ def generate_report(tile: Tile) -> str:
 
 
 def error(message: str) -> NoReturn:
-    """ Print an error to the screen and exit. """
+    """Print an error to the screen and exit."""
     print(f"ERROR | {message}", file=sys.stderr)
     sys.exit(1)
 
 
 def factors(n: int) -> Set[int]:
-    """ Helper function to get the factors of an integer.
+    """Helper function to get the factors of an integer.
 
     Shamelessly copied and pasted from StackOverflow.
     """
     return set(
-        factor for i in range(1, int(n**0.5) + 1) if n % i == 0
-        for factor in (i, n//i)
+        factor for i in range(1, int(n ** 0.5) + 1) if n % i == 0 for factor in (i, n // i)
     )
 
 

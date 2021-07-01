@@ -15,7 +15,7 @@ DTED_2_NO_VOID_DATA_FILE = TEST_DATA_DIR / "n41_w071_1arc_v3.dt2"
 
 
 def test_void_value_warning() -> None:
-    """ Test that a warning is raised when parsing a DTED file with void data. """
+    """Test that a warning is raised when parsing a DTED file with void data."""
     dted_tile = Tile(DTED_1_VOID_DATA_FILE, in_memory=False)
     with pytest.warns(VoidDataWarning):
         dted_tile.load_data()
@@ -23,7 +23,7 @@ def test_void_value_warning() -> None:
 
 
 def test_raw_file_parse() -> None:
-    """ Test that elevation data parsed directly from a DTED file matches
+    """Test that elevation data parsed directly from a DTED file matches
     the elevation data loaded entirely into memory.
     """
     in_memory_file = Tile(DTED_2_NO_VOID_DATA_FILE, in_memory=True)
@@ -51,7 +51,7 @@ def test_raw_file_parse() -> None:
 )
 # fmt: on
 def test_convert_signed_magnitude(signed_magnitude: int, twos_complement: int) -> None:
-    """ Test that conversion between signed magnitude and 2's complement for
+    """Test that conversion between signed magnitude and 2's complement for
     16 bit integers works as expected.
     """
     # Created non-writeable views to int16 arrays.

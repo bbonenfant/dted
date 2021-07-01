@@ -12,7 +12,7 @@ _SENTINEL = b"ACC"
 @dataclass
 class AccuracyDescription:
     # noinspection PyUnresolvedReferences
-    """ Dataclass holding the contents of the Data Set Identification section of a DTED file.
+    """Dataclass holding the contents of the Data Set Identification section of a DTED file.
 
     Args:
         absolute_horizontal: Absolute horizontal accuracy of the data, if available.
@@ -29,14 +29,14 @@ class AccuracyDescription:
 
     @classmethod
     def from_bytes(cls, data: bytes) -> "AccuracyDescription":
-        """ Parse the Accuracy Description record from the raw data of a DTED file.
+        """Parse the Accuracy Description record from the raw data of a DTED file.
 
         This record is defined to be exactly 2700 bytes and therefore the input data
             must contain at least 2700 bytes.
 
         Raises:
             ValueError: If not enough binary data is provided (at least 2700 bytes).
-            AssertionError: If the binary data does not start with "ACC".
+            InvalidFileError: If the binary data does not start with "ACC".
         """
         if len(data) < ACC_SIZE:
             raise ValueError(

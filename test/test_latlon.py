@@ -12,7 +12,7 @@ from dted import latlon
 )
 # fmt: on
 def test_latlon_validation(latitude: float, longitude: float) -> None:
-    """ Test that the invalid latitude and longitudes raise errors. """
+    """Test that the invalid latitude and longitudes raise errors."""
     with pytest.raises(ValueError):
         latlon.LatLon(latitude, longitude)
 
@@ -27,9 +27,9 @@ def test_latlon_from_dted(
     latitude_str: str,
     longitude_str: str,
     expected_latitude: float,
-    expected_longitude: float
+    expected_longitude: float,
 ) -> None:
-    """ Test that DTED coordinate strings are parsed as expected. """
+    """Test that DTED coordinate strings are parsed as expected."""
     result = latlon.LatLon.from_dted(latitude_str, longitude_str)
     assert result.latitude == expected_latitude
     assert result.longitude == expected_longitude
@@ -45,7 +45,7 @@ def test_latlon_from_dted(
 )
 # fmt: on
 def test_dms_to_decimal(degree: int, minute: int, second: int, expected: float) -> None:
-    """ Tests for the `dms_to_decimal` function. """
+    """Tests for the `dms_to_decimal` function."""
     assert latlon.dms_to_decimal(degree, minute, second) == expected
 
 
@@ -59,8 +59,5 @@ def test_dms_to_decimal(degree: int, minute: int, second: int, expected: float) 
 )
 # fmt: on
 def test_parse_dms_coordinate(coordinate: str, expected: Tuple[int, int, float]) -> None:
-    """ Tests for the `parse_dms_coordinate` function. """
+    """Tests for the `parse_dms_coordinate` function."""
     assert latlon.parse_dms_coordinate(coordinate) == expected
-
-
-

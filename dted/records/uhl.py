@@ -13,7 +13,7 @@ _SENTINEL = b"UHL1"
 @dataclass
 class UserHeaderLabel:
     # noinspection PyUnresolvedReferences
-    """ Dataclass holding the contents of the User Header Label of a DTED file.
+    """Dataclass holding the contents of the User Header Label of a DTED file.
 
     Args:
         origin: The origin of the DTED file as a latitude-longitude coordinate.
@@ -41,7 +41,7 @@ class UserHeaderLabel:
 
     @classmethod
     def from_bytes(cls, data: bytes) -> "UserHeaderLabel":
-        """ Parse the User Header Label from the raw data of a DTED file.
+        """Parse the User Header Label from the raw data of a DTED file.
 
         This section is defined to be exactly 80 bytes and therefore the input data
             must contain at least 80 bytes.

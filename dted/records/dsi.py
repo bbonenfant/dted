@@ -14,7 +14,7 @@ _SENTINEL = b"DSI"
 @dataclass
 class DataSetIdentification:
     # noinspection PyUnresolvedReferences
-    """ Dataclass holding the contents of the Data Set Identification section of a DTED file.
+    """Dataclass holding the contents of the Data Set Identification section of a DTED file.
 
     Args:
         security_code: The security code of the data (should be "U" for unclassified).
@@ -86,7 +86,7 @@ class DataSetIdentification:
 
     @classmethod
     def from_bytes(cls, data: bytes) -> "DataSetIdentification":
-        """ Parse the Data Set Identification record from the raw data of a DTED file.
+        """Parse the Data Set Identification record from the raw data of a DTED file.
 
         This record is defined to be exactly 648 bytes and therefore the input data
             must contain at least 648 bytes.
@@ -191,14 +191,14 @@ class DataSetIdentification:
 
     @property
     def data_block_length(self) -> int:
-        """ Returns the length (in bytes) of a block of data
+        """Returns the length (in bytes) of a block of data
         within the Data Record of the DTED file containing this DSI record.
         """
         return 12 + (2 * self.shape[1])
 
 
 def parse_month_date(date_str: str) -> Optional[date]:
-    """ Parse a nullable DTED date string.
+    """Parse a nullable DTED date string.
 
     The DTED date string is of the format YYMM where 0000 is a null value.
     """
