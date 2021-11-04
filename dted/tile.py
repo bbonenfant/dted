@@ -153,6 +153,9 @@ class Tile:
 
         Raises:
             InvalidFileError: If a data block fails it's checksum.
+
+        Warnings:
+            VoidDataWarning: If void data is detected within the DTED file.
         """
 
         # Open the file, seek to the data blocks, and start parsing.
@@ -166,7 +169,7 @@ class Tile:
                 block=data_record[column * block_length : (column + 1) * block_length],
                 perform_checksum=perform_checksum,
             )
-            for column in range(self.dsi.shape[0])
+            for column in range(self.dsi.shape[1])
         ]
         self._data = _convert_signed_magnitude(np.asarray(parsed_data_blocks))
 

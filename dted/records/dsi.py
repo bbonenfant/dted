@@ -194,7 +194,7 @@ class DataSetIdentification:
         """Returns the length (in bytes) of a block of data
         within the Data Record of the DTED file containing this DSI record.
         """
-        return 12 + (2 * self.shape[1])
+        return 12 + (2 * self.shape[0])
 
 
 def parse_month_date(date_str: str) -> Optional[date]:
