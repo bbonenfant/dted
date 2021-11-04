@@ -19,7 +19,7 @@ DTED_2_RECT_RESOLUTION_DATA_FILE = TEST_DATA_DIR / "s55_w069_1arc_v3.dt2"
 
 @pytest.fixture
 def suppress_void_data_warning() -> None:
-    """ Fixture to suppress VoidDataWarnings when we don't care. """
+    """Fixture to suppress VoidDataWarnings when we don't care."""
     warnings.simplefilter(action="ignore", category=VoidDataWarning)
 
 
