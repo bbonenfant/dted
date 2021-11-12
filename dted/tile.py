@@ -127,9 +127,14 @@ class Tile:
             )
 
         origin_latitude, origin_longitude = astuple(self.dsi.origin)
+        longitude_count, latitude_count = self.dsi.shape
         lat_interval, lon_interval = self.dsi.latitude_interval, self.dsi.longitude_interval
-        latitude_index = round((latlon.latitude - origin_latitude) * 3600 / lat_interval)
-        longitude_index = round((latlon.longitude - origin_longitude) * 3600 / lon_interval)
+        latitude_index = round(
+            (latlon.latitude - origin_latitude) * (latitude_count - 1) / lat_interval
+        )
+        longitude_index = round(
+            (latlon.longitude - origin_longitude) * (longitude_count - 1) / lon_interval
+        )
 
         if self._data is not None:
             return self._data[longitude_index, latitude_index]
@@ -169,7 +174,7 @@ class Tile:
                 block=data_record[column * block_length : (column + 1) * block_length],
                 perform_checksum=perform_checksum,
             )
-            for column in range(self.dsi.shape[1])
+            for column in range(self.dsi.shape[0])
         ]
         self._data = _convert_signed_magnitude(np.asarray(parsed_data_blocks))
 

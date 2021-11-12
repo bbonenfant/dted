@@ -154,7 +154,7 @@ class DataSetIdentification:
         orientation = float(buffered_data.read(9))
         longitude_interval = int(buffered_data.read(4)) / 10
         latitude_interval = int(buffered_data.read(4)) / 10
-        shape = int(buffered_data.read(4)), int(buffered_data.read(4))
+        shape = (int(buffered_data.read(4)), int(buffered_data.read(4)))[::-1]
         coverage = float(buffered_data.read(2))
         coverage = 1 if coverage == 0 else coverage
 
@@ -194,7 +194,7 @@ class DataSetIdentification:
         """Returns the length (in bytes) of a block of data
         within the Data Record of the DTED file containing this DSI record.
         """
-        return 12 + (2 * self.shape[0])
+        return 12 + (2 * self.shape[1])
 
 
 def parse_month_date(date_str: str) -> Optional[date]:
