@@ -127,9 +127,14 @@ class Tile:
             )
 
         origin_latitude, origin_longitude = astuple(self.dsi.origin)
+        longitude_count, latitude_count = self.dsi.shape
         lat_interval, lon_interval = self.dsi.latitude_interval, self.dsi.longitude_interval
-        latitude_index = round((latlon.latitude - origin_latitude) * 3600 / lat_interval)
-        longitude_index = round((latlon.longitude - origin_longitude) * 3600 / lon_interval)
+        latitude_index = round(
+            (latlon.latitude - origin_latitude) * (latitude_count - 1) / lat_interval
+        )
+        longitude_index = round(
+            (latlon.longitude - origin_longitude) * (longitude_count - 1) / lon_interval
+        )
 
         if self._data is not None:
             return self._data[longitude_index, latitude_index]
@@ -153,6 +158,9 @@ class Tile:
 
         Raises:
             InvalidFileError: If a data block fails it's checksum.
+
+        Warnings:
+            VoidDataWarning: If void data is detected within the DTED file.
         """
 
         # Open the file, seek to the data blocks, and start parsing.

@@ -35,7 +35,7 @@ tile = Tile(dted_file)
 assert isinstance(tile.data, np.ndarray)
 ```
 
-Additionally you can access the metadata of the DTED file (the User Header 
+Additionally, you can access the metadata of the DTED file (the User Header 
   Label, Data Set Identification, and Accuracy Description records) easily.
 
 ```python
@@ -62,7 +62,7 @@ tile = Tile(dted_file, in_memory=False)
 print(tile.get_elevation(LatLon(latitude=41.5, longitude=-70.5)))
 ```
 
-If for some reason you _really_ need to eek out every bit of performance and
+If for some reason you _really_ need to eke out every bit of performance, and
   you thoroughly trust your DTED data, you speed up the data parsing by
   skipping the checksum verification. Doing the following takes about 75 ms
   on my machine:
@@ -183,7 +183,7 @@ Some things to be aware of with the DTED file format:
   notation. This has no effect on a user of this package interacting with
   the parsed terrain elevation data, but it does slow down the parsing of 
   this data as I do not know of an optimized method of parsing signed
-  magnitude data in python. If someone knows how to do this this parsing
+  magnitude data in python. If someone knows how to do this, this parsing
   library could become even faster. 
 
 ### Where to find DTED data
@@ -194,9 +194,9 @@ Publicly available DTED data is relatively hard to find and access,
 
 This EarthExplorer app provided by the USGS provides an interface to 
   download many types of terrain data, including the SRTM DTED data.
-  However, you need to make an account with them in order to perform 
-  and I'm unsure of a way to use their machine-to-machine API to automate
-  downloading data.
+  However, you need to make an account with them in order to perform the
+  download, and I'm unsure of a way to use their machine-to-machine API
+  to automate downloading data.
 
 ### Contributing
 
