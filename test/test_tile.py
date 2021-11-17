@@ -81,7 +81,9 @@ def test_raw_file_parse(dted_file: Path) -> None:
 @pytest.mark.usefixtures("suppress_void_data_warning")
 def test_data_shape(dted_file: Path) -> None:
     tile = Tile(dted_file, in_memory=True)
-    assert tile.data.shape == tile.dsi.shape
+    assert tile.data.shape == tile.dsi.shape == tile.uhl.shape
+    assert tile.dsi.latitude_interval == tile.uhl.latitude_interval
+    assert tile.dsi.longitude_interval == tile.uhl.longitude_interval
 
 
 # fmt: off
