@@ -152,8 +152,8 @@ class DataSetIdentification:
             longitude_str=buffered_data.read(8).decode(_UTF8),
         )
         orientation = float(buffered_data.read(9))
-        longitude_interval = int(buffered_data.read(4)) / 10
         latitude_interval = int(buffered_data.read(4)) / 10
+        longitude_interval = int(buffered_data.read(4)) / 10
         shape = (int(buffered_data.read(4)), int(buffered_data.read(4)))[::-1]
         coverage = float(buffered_data.read(2))
         coverage = 1 if coverage == 0 else coverage

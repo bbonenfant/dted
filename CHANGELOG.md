@@ -1,5 +1,9 @@
 # Change Log
 
+## v1.0.2 -- 2021-11-17
+
+Bug Fix: incorrectly parsed lat, long resolutions
+
 ## v1.0.1 -- 2021-11-15
 
 Bug Fix: incorrectly parsed dataset shape
