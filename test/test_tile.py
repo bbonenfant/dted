@@ -79,6 +79,19 @@ def test_raw_file_parse(dted_file: Path) -> None:
 
 
 @pytest.mark.usefixtures("suppress_void_data_warning")
+def test_sanity_check_parsing(dted_file: Path) -> None:
+    """Perform a sanity check that elevation lookups are performed correctly
+    at the corners of the tile.
+    """
+    tile = Tile(dted_file, in_memory=True)
+
+    assert tile.get_elevation(tile.dsi.south_west_corner) == tile.data[0, 0]
+    assert tile.get_elevation(tile.dsi.north_west_corner) == tile.data[0, -1]
+    assert tile.get_elevation(tile.dsi.south_east_corner) == tile.data[-1, 0]
+    assert tile.get_elevation(tile.dsi.north_east_corner) == tile.data[-1, -1]
+
+
+@pytest.mark.usefixtures("suppress_void_data_warning")
 def test_data_shape(dted_file: Path) -> None:
     tile = Tile(dted_file, in_memory=True)
     assert tile.data.shape == tile.dsi.shape
