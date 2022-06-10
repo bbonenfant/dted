@@ -127,14 +127,9 @@ class Tile:
             )
 
         origin_latitude, origin_longitude = astuple(self.dsi.origin)
-        longitude_count, latitude_count = self.dsi.shape
-        lat_interval, lon_interval = self.dsi.latitude_interval, self.dsi.longitude_interval
-        latitude_index = round(
-            (latlon.latitude - origin_latitude) * (latitude_count - 1) / lat_interval
-        )
-        longitude_index = round(
-            (latlon.longitude - origin_longitude) * (longitude_count - 1) / lon_interval
-        )
+        lon_count, lat_count = self.dsi.shape
+        latitude_index = round((latlon.latitude - origin_latitude) * (lat_count - 1))
+        longitude_index = round((latlon.longitude - origin_longitude) * (lon_count - 1))
 
         if self._data is not None:
             return self._data[longitude_index, latitude_index]
