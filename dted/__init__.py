@@ -3,6 +3,7 @@
 import importlib.metadata as metadata
 from .latlon import LatLon
 from .tile import Tile
+from .tiles import Tiles
 
 __version__ = ""
 try:
