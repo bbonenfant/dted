@@ -93,6 +93,33 @@ tile = Tile(dted_file, in_memory=False)
 assert LatLon(latitude=41.5, longitude=-70.25) in tile
 ```
 
+DTED batch processing is also available with the `dted.Tiles` class. The 
+Tiles class is a natural extension of the Tile class, allowing the user to 
+specify a directory of dted 1, 2 (or both) files to load into memory. The user
+can also specify which level of dted to load and if they are loaded in_memory
+or not.
+
+```python
+from dted import Tiles, LatLon
+
+tiles = Tiles(in_memory=False, dted_level=2)
+tiles.load_tiles_from_dir(r'test/data/')
+tile = tiles.get_tile(LatLon(latitude=41.5, longitude=-70.25))
+
+assert LatLon(latitude=41.5, longitude=-70.25) in tile
+```
+
+You can also get the elevation directly from the Tiles class.
+
+```python
+from dted import Tiles, LatLon
+
+tiles = Tiles(in_memory=False, dted_level=2)
+tiles.load_tiles_from_dir(r'test/data/')
+tiles.get_elevation(LatLon(latitude=41.5, longitude=-70.25))
+```
+
+
 ## As a CLI
 
 Installing this package into an activated virtual environment also exposes
