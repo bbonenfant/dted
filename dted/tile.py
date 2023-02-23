@@ -82,7 +82,7 @@ class Tile:
             https://www.dlr.de/eoc/Portaldata/60/Resources/dokumente/7_sat_miss/SRTM-XSAR-DEM-DTED-1.1.pdf
     """
 
-    def __init__(self, file: _FilePath, *, in_memory: bool = True):
+    def __init__(self, file: _FilePath, *, in_memory: bool = True, unsafe: bool = False):
         """
         Args:
             file: The DTED file to parse.
@@ -94,12 +94,12 @@ class Tile:
         self._data: Optional[np.ndarray] = None
 
         with self.file.open("rb") as f:
-            self.uhl = UserHeaderLabel.from_bytes(f.read(UHL_SIZE))
-            self.dsi = DataSetIdentification.from_bytes(f.read(DSI_SIZE))
-            self.acc = AccuracyDescription.from_bytes(f.read(ACC_SIZE))
+            self.uhl = UserHeaderLabel.from_bytes(f.read(UHL_SIZE), unsafe=unsafe)
+            self.dsi = DataSetIdentification.from_bytes(f.read(DSI_SIZE), unsafe=unsafe)
+            self.acc = AccuracyDescription.from_bytes(f.read(ACC_SIZE), unsafe=unsafe)
 
         if in_memory:
-            self.load_data()
+            self.load_data(unsafe=unsafe)
 
     @property
     def data(self) -> np.ndarray:
@@ -141,7 +141,7 @@ class Tile:
             data_block = _convert_signed_magnitude(data_block)
             return data_block[latitude_index]
 
-    def load_data(self, *, perform_checksum: bool = True) -> None:
+    def load_data(self, *, perform_checksum: bool = True, unsafe: bool = False) -> None:
         """Load the elevation data into memory.
 
         This loaded elevation data can be accessed through the `self.data` attribute.
@@ -173,7 +173,7 @@ class Tile:
         ]
         self._data = _convert_signed_magnitude(np.asarray(parsed_data_blocks))
 
-        if VOID_DATA_VALUE in self._data:
+        if not unsafe and VOID_DATA_VALUE in self._data:
             warn(  # Void Data Warning  )
                 f"\n\tVoid data has been detected within the DTED file ({self.file}). "
                 f"\n\tThis can happen when DTED data is not specified over bodies of water. "

@@ -85,7 +85,7 @@ class DataSetIdentification:
     _data: bytes
 
     @classmethod
-    def from_bytes(cls, data: bytes) -> "DataSetIdentification":
+    def from_bytes(cls, data: bytes, *, unsafe: bool = False) -> "DataSetIdentification":
         """Parse the Data Set Identification record from the raw data of a DTED file.
 
         This record is defined to be exactly 648 bytes and therefore the input data
@@ -116,7 +116,12 @@ class DataSetIdentification:
         product_level = buffered_data.read(5).decode(_UTF8)
         reference = buffered_data.read(15)
         _ = buffered_data.read(8)
-        edition = int(buffered_data.read(2))
+        edition = None
+        try:
+            edition = int(buffered_data.read(2))
+        except ValueError as e:
+            if not unsafe:
+                raise e
         merge_version = buffered_data.read(1).decode(_UTF8)
         maintenance_date = parse_month_date(buffered_data.read(4).decode(_UTF8))
         merge_date = parse_month_date(buffered_data.read(4).decode(_UTF8))
@@ -151,12 +156,37 @@ class DataSetIdentification:
             latitude_str=buffered_data.read(7).decode(_UTF8),
             longitude_str=buffered_data.read(8).decode(_UTF8),
         )
-        orientation = float(buffered_data.read(9))
-        latitude_interval = int(buffered_data.read(4)) / 10
-        longitude_interval = int(buffered_data.read(4)) / 10
-        shape = (int(buffered_data.read(4)), int(buffered_data.read(4)))[::-1]
-        coverage = float(buffered_data.read(2))
-        coverage = 1 if coverage == 0 else coverage
+        orientation = None
+        try:
+            orientation = float(buffered_data.read(9))
+        except ValueError as e:
+            if not unsafe:
+                raise e
+        latitude_interval = None
+        try:
+            latitude_interval = int(buffered_data.read(4)) / 10
+        except ValueError as e:
+            if not unsafe:
+                raise e
+        longitude_interval = None
+        try:
+            longitude_interval = int(buffered_data.read(4)) / 10
+        except ValueError as e:
+            if not unsafe:
+                raise e
+        shape = (0, 0)
+        try:
+            shape = (int(buffered_data.read(4)), int(buffered_data.read(4)))[::-1]
+        except ValueError as e:
+            if not unsafe:
+                raise e
+        coverage = None
+        try:
+            coverage = float(buffered_data.read(2))
+            coverage = 1 if coverage == 0 else coverage
+        except ValueError as e:
+            if not unsafe:
+                raise e
 
         return cls(
             security_code=security_code,
@@ -202,6 +232,6 @@ def parse_month_date(date_str: str) -> Optional[date]:
 
     The DTED date string is of the format YYMM where 0000 is a null value.
     """
-    if date_str[2:] == "00":
+    if date_str[2:] == "00" or date_str == "    ":
         return None
     return datetime.strptime(date_str, "%y%m").date()

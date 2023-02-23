@@ -40,7 +40,7 @@ class UserHeaderLabel:
     _data: bytes
 
     @classmethod
-    def from_bytes(cls, data: bytes) -> "UserHeaderLabel":
+    def from_bytes(cls, data: bytes, *, unsafe: bool = False) -> "UserHeaderLabel":
         """Parse the User Header Label from the raw data of a DTED file.
 
         This section is defined to be exactly 80 bytes and therefore the input data
@@ -66,13 +66,35 @@ class UserHeaderLabel:
         longitude_str = buffered_data.read(8).decode(_UTF8)
         latitude_str = buffered_data.read(8).decode(_UTF8)
         origin = LatLon.from_dted(latitude_str=latitude_str, longitude_str=longitude_str)
-        longitude_interval = int(buffered_data.read(4)) / 10
-        latitude_interval = int(buffered_data.read(4)) / 10
+        longitude_interval = None
+        try:
+            longitude_interval = int(buffered_data.read(4)) / 10
+        except ValueError as e:
+            if not unsafe:
+                raise e
+        latitude_interval = None
+        try:
+            latitude_interval = int(buffered_data.read(4)) / 10
+        except ValueError as e:
+            if not unsafe:
+                raise e
         vertical_accuracy_ = buffered_data.read(4)
-        vertical_accuracy = None if b"NA" in vertical_accuracy_ else int(vertical_accuracy_)
+        try:
+            vertical_accuracy = (
+                None if b"NA" in vertical_accuracy_ else int(vertical_accuracy_)
+            )
+        except ValueError as e:
+            if not unsafe:
+                raise e
+            vertical_accuracy = None
         security_code = buffered_data.read(3)
         reference = buffered_data.read(12)
-        shape = int(buffered_data.read(4)), int(buffered_data.read(4))
+        shape = (0, 0)
+        try:
+            shape = int(buffered_data.read(4)), int(buffered_data.read(4))
+        except ValueError as e:
+            if not unsafe:
+                raise e
         multiple_accuracy = buffered_data.read(1) != b"0"
         return cls(
             origin=origin,
