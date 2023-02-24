@@ -3,7 +3,7 @@ from dataclasses import astuple
 from pathlib import Path
 from struct import unpack
 from typing import Optional, Union
-from warnings import warn
+from warnings import warn as emit_warning
 
 import numpy as np
 
@@ -82,16 +82,19 @@ class Tile:
             https://www.dlr.de/eoc/Portaldata/60/Resources/dokumente/7_sat_miss/SRTM-XSAR-DEM-DTED-1.1.pdf
     """
 
-    def __init__(self, file: _FilePath, *, in_memory: bool = True):
+    def __init__(self, file: _FilePath, *, in_memory: bool = True, warn: bool = True):
         """
         Args:
             file: The DTED file to parse.
             in_memory: Whether to read the elevation data into memory.
                 If in_memory is False, elevation data can still be accessed at
                 individual points directly from the file.
+            warn: Whether to emit the warning if void data is detected within
+                the DTED file. Defaults to True.
         """
         self.file = Path(file)
         self._data: Optional[np.ndarray] = None
+        self._warn = warn
 
         with self.file.open("rb") as f:
             self.uhl = UserHeaderLabel.from_bytes(f.read(UHL_SIZE))
@@ -141,18 +144,20 @@ class Tile:
             data_block = _convert_signed_magnitude(data_block)
             return data_block[latitude_index]
 
-    def load_data(self, *, perform_checksum: bool = True) -> None:
+    def load_data(self, *, perform_checksum: bool = True, warn: bool = None) -> None:
         """Load the elevation data into memory.
 
         This loaded elevation data can be accessed through the `self.data` attribute.
 
         Args:
             perform_checksum: Whether to perform the checksum for each data block.
-                The user is allowed to toggle this off but it is strongly suggested
+                The user is allowed to toggle this off, but it is strongly suggested
                 that the checksums be performed.
+            warn: Whether to emit the warning if void data is detected within
+                the DTED file. Defaults to value set at initialization.
 
         Raises:
-            InvalidFileError: If a data block fails it's checksum.
+            InvalidFileError: If a data block fails its checksum.
 
         Warnings:
             VoidDataWarning: If void data is detected within the DTED file.
@@ -173,8 +178,9 @@ class Tile:
         ]
         self._data = _convert_signed_magnitude(np.asarray(parsed_data_blocks))
 
-        if VOID_DATA_VALUE in self._data:
-            warn(  # Void Data Warning  )
+        warn = self._warn if warn is None else warn
+        if warn and VOID_DATA_VALUE in self._data:
+            emit_warning(  # Void Data Warning  )
                 f"\n\tVoid data has been detected within the DTED file ({self.file}). "
                 f"\n\tThis can happen when DTED data is not specified over bodies of water. "
                 f"\n\tThis does not mean the DTED data is invalid, but you must handle this "

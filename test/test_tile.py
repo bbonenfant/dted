@@ -46,6 +46,28 @@ def test_void_value_warning() -> None:
             assert VOID_DATA_VALUE in tile.data
 
 
+# fmt: off
+@pytest.mark.parametrize(
+    "init_warn, load_warn, expect_warn",
+    [(False, None,  False),
+     (False, False, False),
+     (False, True,  True),
+     (True,  None,  True),
+     (True,  False, False),
+     (True,  True,  True)]
+)
+# fmt: on
+def test_warning_toggle(init_warn: bool, load_warn: bool, expect_warn: bool) -> None:
+    """Test that the "warn" kwargs for Tile.__init__ and Tile.load_data
+    interact correctly and suppress the warning as expected.
+    """
+    for dted_file in (DTED_1_VOID_DATA_FILE, DTED_2_RECT_RESOLUTION_DATA_FILE):
+        with warnings.catch_warnings(record=True) as record:
+            tile = Tile(dted_file, in_memory=False, warn=init_warn)
+            tile.load_data(warn=load_warn)
+        assert any(record) == expect_warn
+
+
 @pytest.mark.usefixtures("suppress_void_data_warning")
 def test_rectangular_resolution() -> None:
     """Test that a DTED file where vertical resolution != horizontal resolution

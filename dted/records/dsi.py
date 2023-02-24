@@ -43,8 +43,8 @@ class DataSetIdentification:
         north_west_corner: The north west corner of the DTED data.
         north_east_corner: The north east corner of the DTED data.
         south_east_corner: The south east corner of the DTED data.
-        orientation: Clockwise orientation angle of data with respect to true North
-            (This will usually be 0 for DTED).
+        orientation: Clockwise orientation angle of data with respect to true North,
+            if it exists (this will usually be 0 for DTED).
         longitude_interval: Longitude data interval in seconds.
         latitude_interval: Latitude data interval in seconds.
         vertical_accuracy: Absolute vertical accuracy in meters
@@ -176,8 +176,7 @@ class DataSetIdentification:
             )
 
         coverage = try_float(buffered_data.read(2))
-        if coverage is not None:
-            coverage = 1 if coverage == 0 else coverage
+        coverage = 1 if coverage == 0 else coverage
 
         return cls(
             security_code=security_code,

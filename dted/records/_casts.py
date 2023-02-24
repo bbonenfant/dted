@@ -1,3 +1,4 @@
+"""Type-cast functions that default to None if a ValueError occurs."""
 from typing import Optional
 
 
