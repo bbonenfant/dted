@@ -68,17 +68,17 @@ class UserHeaderLabel:
         latitude_str = buffered_data.read(8).decode(_UTF8)
         origin = LatLon.from_dted(latitude_str=latitude_str, longitude_str=longitude_str)
 
-        latitude_interval = try_int(buffered_data.read(4))
-        if latitude_interval is None:
-            raise InvalidFileError(
-                "The latitude interval of the gridded data must be specified in the "
-                "UserHeaderLabel section of the DTED file. "
-            )
-
         longitude_interval = try_int(buffered_data.read(4))
         if longitude_interval is None:
             raise InvalidFileError(
                 "The longitude interval of the gridded data must be specified in the "
+                "UserHeaderLabel section of the DTED file. "
+            )
+
+        latitude_interval = try_int(buffered_data.read(4))
+        if latitude_interval is None:
+            raise InvalidFileError(
+                "The latitude interval of the gridded data must be specified in the "
                 "UserHeaderLabel section of the DTED file. "
             )
 

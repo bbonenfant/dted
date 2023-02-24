@@ -154,17 +154,17 @@ class DataSetIdentification:
         )
         orientation = try_float(buffered_data.read(9))
 
-        longitude_interval = try_int(buffered_data.read(4))
-        if longitude_interval is None:
-            raise InvalidFileError(
-                "The longitude interval of the gridded data must be specified in the "
-                "DataSetIdentification section of the DTED file. "
-            )
-
         latitude_interval = try_int(buffered_data.read(4))
         if latitude_interval is None:
             raise InvalidFileError(
                 "The latitude interval of the gridded data must be specified in the "
+                "DataSetIdentification section of the DTED file. "
+            )
+
+        longitude_interval = try_int(buffered_data.read(4))
+        if longitude_interval is None:
+            raise InvalidFileError(
+                "The longitude interval of the gridded data must be specified in the "
                 "DataSetIdentification section of the DTED file. "
             )
 
