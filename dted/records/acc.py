@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from io import BytesIO
 from typing import Optional
 
+from ._casts import try_int
 from ..definitions import ACC_SIZE
 from ..errors import InvalidFileError
 
@@ -28,7 +29,7 @@ class AccuracyDescription:
     _data: bytes
 
     @classmethod
-    def from_bytes(cls, data: bytes, *, unsafe: bool = False) -> "AccuracyDescription":
+    def from_bytes(cls, data: bytes) -> "AccuracyDescription":
         """Parse the Accuracy Description record from the raw data of a DTED file.
 
         This record is defined to be exactly 2700 bytes and therefore the input data
@@ -51,38 +52,14 @@ class AccuracyDescription:
                 f"Accuracy Description Records must start with '{_SENTINEL!r}'. "
                 f"Found: {sentinel!r}"
             )
-        abs_horizontal = buffered_data.read(4)
-        abs_vertical = buffered_data.read(4)
-        rel_horizontal = buffered_data.read(4)
-        rel_vertical = buffered_data.read(4)
-        absolute_horizontal_ = None
-        absolute_vertical_ = None
-        relative_horizontal_ = None
-        relative_vertical_ = None
-        try:
-            absolute_horizontal_ = None if b"NA" in abs_horizontal else int(abs_horizontal)
-        except ValueError as e:
-            if not unsafe:
-                raise e
-        try:
-            absolute_vertical_ = None if b"NA" in abs_vertical else int(abs_vertical)
-        except ValueError as e:
-            if not unsafe:
-                raise e
-        try:
-            relative_horizontal_ = None if b"NA" in rel_horizontal else int(rel_horizontal)
-        except ValueError as e:
-            if not unsafe:
-                raise e
-        try:
-            relative_vertical_ = None if b"NA" in rel_vertical else int(rel_vertical)
-        except ValueError as e:
-            if not unsafe:
-                raise e
+        absolute_horizontal = try_int(buffered_data.read(4))
+        absolute_vertical = try_int(buffered_data.read(4))
+        relative_horizontal = try_int(buffered_data.read(4))
+        relative_vertical = try_int(buffered_data.read(4))
         return cls(
-            absolute_horizontal=absolute_horizontal_,
-            absolute_vertical=absolute_vertical_,
-            relative_horizontal=relative_horizontal_,
-            relative_vertical=relative_vertical_,
+            absolute_horizontal=absolute_horizontal,
+            absolute_vertical=absolute_vertical,
+            relative_horizontal=relative_horizontal,
+            relative_vertical=relative_vertical,
             _data=data,
         )
