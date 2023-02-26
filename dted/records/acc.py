@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from io import BytesIO
 from typing import Optional
 
+from ._casts import try_int
 from ..definitions import ACC_SIZE
 from ..errors import InvalidFileError
 
@@ -51,14 +52,14 @@ class AccuracyDescription:
                 f"Accuracy Description Records must start with '{_SENTINEL!r}'. "
                 f"Found: {sentinel!r}"
             )
-        abs_horizontal = buffered_data.read(4)
-        abs_vertical = buffered_data.read(4)
-        rel_horizontal = buffered_data.read(4)
-        rel_vertical = buffered_data.read(4)
+        absolute_horizontal = try_int(buffered_data.read(4))
+        absolute_vertical = try_int(buffered_data.read(4))
+        relative_horizontal = try_int(buffered_data.read(4))
+        relative_vertical = try_int(buffered_data.read(4))
         return cls(
-            absolute_horizontal=None if b"NA" in abs_horizontal else int(abs_horizontal),
-            absolute_vertical=None if b"NA" in abs_vertical else int(abs_vertical),
-            relative_horizontal=None if b"NA" in rel_horizontal else int(rel_horizontal),
-            relative_vertical=None if b"NA" in rel_vertical else int(rel_vertical),
+            absolute_horizontal=absolute_horizontal,
+            absolute_vertical=absolute_vertical,
+            relative_horizontal=relative_horizontal,
+            relative_vertical=relative_vertical,
             _data=data,
         )
