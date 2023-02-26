@@ -4,6 +4,7 @@ from datetime import date, datetime
 from io import BytesIO
 from typing import Optional, Tuple
 
+from ._casts import try_int, try_float
 from ..definitions import DSI_SIZE, _UTF8
 from ..errors import InvalidFileError
 from ..latlon import LatLon
@@ -22,7 +23,7 @@ class DataSetIdentification:
         handling_description: Security handling description.
         product_level: DMA Series designator for product level (i.e. DTED1 or DTED2).
         reference: Unique reference number.
-        edition: Data edition number (number between 1 and 99).
+        edition: Data edition number (number between 1 and 99), if available.
         merge_version: match or merge version (single character A-Z).
         maintenance_date: Date of last maintenance (if it exists).
             Note: Only year and month are provided -- no day specified.
@@ -42,8 +43,8 @@ class DataSetIdentification:
         north_west_corner: The north west corner of the DTED data.
         north_east_corner: The north east corner of the DTED data.
         south_east_corner: The south east corner of the DTED data.
-        orientation: Clockwise orientation angle of data with respect to true North
-            (This will usually be 0 for DTED).
+        orientation: Clockwise orientation angle of data with respect to true North,
+            if it exists (this will usually be 0 for DTED).
         longitude_interval: Longitude data interval in seconds.
         latitude_interval: Latitude data interval in seconds.
         vertical_accuracy: Absolute vertical accuracy in meters
@@ -51,7 +52,7 @@ class DataSetIdentification:
              relative to mean sea level).
         shape: The shape of the gridded data as
             (number of longitude lines, number of latitude lines).
-        coverage: Percentage of the cell covered by the DTED data.
+        coverage: Percentage of the cell covered by the DTED data, if available.
         _data: raw binary data
     """
     security_code: str
@@ -59,7 +60,7 @@ class DataSetIdentification:
     handling_description: str
     product_level: str
     reference: bytes
-    edition: int
+    edition: Optional[int]
     merge_version: str
     maintenance_date: Optional[date]
     merge_date: Optional[date]
@@ -77,11 +78,11 @@ class DataSetIdentification:
     north_west_corner: LatLon
     north_east_corner: LatLon
     south_east_corner: LatLon
-    orientation: float
+    orientation: Optional[float]
     latitude_interval: float
     longitude_interval: float
     shape: Tuple[int, int]
-    coverage: float
+    coverage: Optional[float]
     _data: bytes
 
     @classmethod
@@ -116,7 +117,7 @@ class DataSetIdentification:
         product_level = buffered_data.read(5).decode(_UTF8)
         reference = buffered_data.read(15)
         _ = buffered_data.read(8)
-        edition = int(buffered_data.read(2))
+        edition = try_int(buffered_data.read(2))
         merge_version = buffered_data.read(1).decode(_UTF8)
         maintenance_date = parse_month_date(buffered_data.read(4).decode(_UTF8))
         merge_date = parse_month_date(buffered_data.read(4).decode(_UTF8))
@@ -151,11 +152,30 @@ class DataSetIdentification:
             latitude_str=buffered_data.read(7).decode(_UTF8),
             longitude_str=buffered_data.read(8).decode(_UTF8),
         )
-        orientation = float(buffered_data.read(9))
-        latitude_interval = int(buffered_data.read(4)) / 10
-        longitude_interval = int(buffered_data.read(4)) / 10
-        shape = (int(buffered_data.read(4)), int(buffered_data.read(4)))[::-1]
-        coverage = float(buffered_data.read(2))
+        orientation = try_float(buffered_data.read(9))
+
+        latitude_interval = try_int(buffered_data.read(4))
+        if latitude_interval is None:
+            raise InvalidFileError(
+                "The latitude interval of the gridded data must be specified in the "
+                "DataSetIdentification section of the DTED file. "
+            )
+
+        longitude_interval = try_int(buffered_data.read(4))
+        if longitude_interval is None:
+            raise InvalidFileError(
+                "The longitude interval of the gridded data must be specified in the "
+                "DataSetIdentification section of the DTED file. "
+            )
+
+        shape = (try_int(buffered_data.read(4)), try_int(buffered_data.read(4)))[::-1]
+        if shape[0] is None or shape[1] is None:
+            raise InvalidFileError(
+                "The shape of the gridded data must be specified in the "
+                "DataSetIdentification section of the DTED file. "
+            )
+
+        coverage = try_float(buffered_data.read(2))
         coverage = 1 if coverage == 0 else coverage
 
         return cls(
@@ -182,8 +202,8 @@ class DataSetIdentification:
             north_east_corner=north_east_corner,
             south_east_corner=south_east_corner,
             orientation=orientation,
-            latitude_interval=latitude_interval,
-            longitude_interval=longitude_interval,
+            latitude_interval=latitude_interval / 10,
+            longitude_interval=longitude_interval / 10,
             shape=shape,
             coverage=coverage,
             _data=data,
@@ -202,6 +222,6 @@ def parse_month_date(date_str: str) -> Optional[date]:
 
     The DTED date string is of the format YYMM where 0000 is a null value.
     """
-    if date_str[2:] == "00":
+    if date_str[2:] in ("00", "  "):
         return None
     return datetime.strptime(date_str, "%y%m").date()

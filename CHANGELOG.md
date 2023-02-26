@@ -1,5 +1,31 @@
 # Change Log
 
+## v1.0.4 -- 2023-02-24
+
+Improvement: VoidDataWarning can now be disabled with a keyword argument:
+* dted.Tile(..., warn=False)
+* dted.Tile.load_data(..., warn=False)
+
+Bug Fix: Prevent unspecified, non-relevant metadata from causing errors
+  when parsing DTED files.
+These fields will no longer cause errors:
+* AccuracyDescription.absolute_horizontal
+* AccuracyDescription.absolute_vertical
+* AccuracyDescription.relative_horizontal
+* AccuracyDescription.relative_vertical
+* DataSetIdentification.edition
+* DataSetIdentification.orientation
+* DataSetIdentification.coverage
+* UserHeaderLabel.vertical_accuracy
+
+The following fields are now explicitly required:
+* DataSetIdentification.latitude_interval
+* DataSetIdentification.longitude_interval
+* DataSetIdentification.shape
+* UserHeaderLabel.latitude_interval
+* UserHeaderLabel.longitude_interval
+* UserHeaderLabel.shape
+
 ## v1.0.3 -- 2022-06-09
 
 Bug Fix: incorrectly computing LatLon -> Tile Index conversion.

@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from io import BytesIO
 from typing import Optional, Tuple
 
+from ._casts import try_int
 from ..definitions import UHL_SIZE, _UTF8
 from ..errors import InvalidFileError
 from ..latlon import LatLon
@@ -66,18 +67,37 @@ class UserHeaderLabel:
         longitude_str = buffered_data.read(8).decode(_UTF8)
         latitude_str = buffered_data.read(8).decode(_UTF8)
         origin = LatLon.from_dted(latitude_str=latitude_str, longitude_str=longitude_str)
-        longitude_interval = int(buffered_data.read(4)) / 10
-        latitude_interval = int(buffered_data.read(4)) / 10
-        vertical_accuracy_ = buffered_data.read(4)
-        vertical_accuracy = None if b"NA" in vertical_accuracy_ else int(vertical_accuracy_)
+
+        longitude_interval = try_int(buffered_data.read(4))
+        if longitude_interval is None:
+            raise InvalidFileError(
+                "The longitude interval of the gridded data must be specified in the "
+                "UserHeaderLabel section of the DTED file. "
+            )
+
+        latitude_interval = try_int(buffered_data.read(4))
+        if latitude_interval is None:
+            raise InvalidFileError(
+                "The latitude interval of the gridded data must be specified in the "
+                "UserHeaderLabel section of the DTED file. "
+            )
+
+        vertical_accuracy = try_int(buffered_data.read(4))
         security_code = buffered_data.read(3)
         reference = buffered_data.read(12)
-        shape = int(buffered_data.read(4)), int(buffered_data.read(4))
+
+        shape = try_int(buffered_data.read(4)), try_int(buffered_data.read(4))
+        if shape[0] is None or shape[1] is None:
+            raise InvalidFileError(
+                "The shape of the gridded data must be specified in the "
+                "UserHeaderLabel section of the DTED file. "
+            )
+
         multiple_accuracy = buffered_data.read(1) != b"0"
         return cls(
             origin=origin,
-            longitude_interval=longitude_interval,
-            latitude_interval=latitude_interval,
+            longitude_interval=longitude_interval / 10,
+            latitude_interval=latitude_interval / 10,
             vertical_accuracy=vertical_accuracy,
             security_code=security_code,
             reference=reference,
