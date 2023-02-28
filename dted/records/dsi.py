@@ -12,7 +12,7 @@ from ..latlon import LatLon
 _SENTINEL = b"DSI"
 
 
-@dataclass
+@dataclass(frozen=True)
 class DataSetIdentification:
     # noinspection PyUnresolvedReferences
     """Dataclass holding the contents of the Data Set Identification section of a DTED file.

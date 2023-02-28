@@ -11,7 +11,7 @@ from ..latlon import LatLon
 _SENTINEL = b"UHL1"
 
 
-@dataclass
+@dataclass(frozen=True)
 class UserHeaderLabel:
     # noinspection PyUnresolvedReferences
     """Dataclass holding the contents of the User Header Label of a DTED file.

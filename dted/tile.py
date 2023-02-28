@@ -199,6 +199,14 @@ class Tile:
         within_longitude_band = minimum_longitude <= item.longitude <= maximum_longitude
         return within_latitude_band and within_longitude_band
 
+    def __hash__(self) -> int:
+        """The hash of a Tile is set by the hash of the file metadata.
+
+        The elevation data is not considered, and therefore it is assumed that
+          files with the same metadata are identical.
+        """
+        return hash((self.acc, self.dsi, self.uhl))
+
 
 def _parse_data_block(block: bytes, perform_checksum: bool) -> np.ndarray:
     """Parse an individual block of data.

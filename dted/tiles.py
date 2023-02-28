@@ -6,6 +6,7 @@ from pathlib import Path
 from .tile import Tile
 from .latlon import LatLon
 
+
 class Tiles():
     '''
     Holds a dictionary of Tile objects
