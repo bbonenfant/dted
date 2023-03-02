@@ -10,6 +10,7 @@ except ImportError:
 
 from .latlon import LatLon
 from .tile import Tile
+from .tileset import TileSet
 
 __version__ = ""
 try:

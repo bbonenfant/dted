@@ -93,6 +93,37 @@ tile = Tile(dted_file, in_memory=False)
 assert LatLon(latitude=41.5, longitude=-70.25) in tile
 ```
 
+The `dted.TileSet` class allows you to query a collection of DTED data,
+i.e. a directory containing many DTED files.
+
+```python
+from dted import TileSet, LatLon
+
+tiles = TileSet('test/data/')
+tiles.get_elevation(LatLon(latitude=41.5, longitude=-70.25))
+```
+
+No elevation data is loaded into memory when DTED sources are added to
+the TileSet. If you need access to the raw elevation data, then you
+must load the elevation data manually:
+
+```python
+from dted import TileSet, LatLon
+
+tiles = TileSet('test/data/')
+with tiles.get_tile(LatLon(41.5, -70.25)) as tile:
+  tile.data = 
+tile = tiles.get_tile(LatLon(latitude=41.5, longitude=-70.25))
+tile.load_data()
+tile.data.max()
+tile.unload_data()
+```
+
+You can also get the elevation directly from the Tiles class.
+
+
+
+
 ## As a CLI
 
 Installing this package into an activated virtual environment also exposes

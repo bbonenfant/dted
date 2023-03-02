@@ -12,7 +12,8 @@ from dted import LatLon, Tile
 from dted.definitions import VOID_DATA_VALUE
 from dted.errors import VoidDataWarning
 
-TEST_DATA_DIR: Path = Path(__file__).parent / "data"
+from . import TEST_DATA_DIR
+
 DTED_1_VOID_DATA_FILE = TEST_DATA_DIR / "n00_e006_3arc_v2.dt1"
 DTED_2_NO_VOID_DATA_FILE = TEST_DATA_DIR / "n41_w071_1arc_v3.dt2"
 DTED_2_RECT_RESOLUTION_DATA_FILE = TEST_DATA_DIR / "s55_w069_1arc_v3.dt2"
@@ -111,6 +112,16 @@ def test_sanity_check_parsing(dted_file: Path) -> None:
     assert tile.get_elevation(tile.dsi.north_west_corner) == tile.data[0, -1]
     assert tile.get_elevation(tile.dsi.south_east_corner) == tile.data[-1, 0]
     assert tile.get_elevation(tile.dsi.north_east_corner) == tile.data[-1, -1]
+
+
+def test_load_unload_data() -> None:
+    """Test a load and unload of elevation into memory."""
+    tile = Tile(DTED_1_VOID_DATA_FILE, in_memory=False)
+    assert tile._data is None
+    tile.load_data(warn=False)
+    assert tile._data is not None
+    tile.unload_data()
+    assert tile._data is None
 
 
 @pytest.mark.usefixtures("suppress_void_data_warning")

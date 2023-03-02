@@ -162,6 +162,9 @@ class Tile:
         Warnings:
             VoidDataWarning: If void data is detected within the DTED file.
         """
+        if isinstance(self._data, np.ndarray) and self._data.size > 0:
+            # Data already loaded, no need to reload.
+            return
 
         # Open the file, seek to the data blocks, and start parsing.
         with self.file.open("rb") as f:
@@ -188,6 +191,11 @@ class Tile:
                 category=VoidDataWarning,
             )
 
+    def unload_data(self) -> None:
+        """Unload the elevation memory from memory."""
+        del self._data
+        self._data = None
+
     def __contains__(self, item: LatLon) -> bool:
         """Determines whether a location is covered by the DTED file."""
         if not isinstance(item, LatLon):
@@ -198,6 +206,14 @@ class Tile:
         within_latitude_band = minimum_latitude <= item.latitude <= maximum_latitude
         within_longitude_band = minimum_longitude <= item.longitude <= maximum_longitude
         return within_latitude_band and within_longitude_band
+
+    def __hash__(self) -> int:
+        """The hash of a Tile is set by the hash of the file metadata.
+
+        The elevation data is not considered, and therefore it is assumed that
+          files with the same metadata are identical.
+        """
+        return hash((self.acc, self.dsi, self.uhl))
 
 
 def _parse_data_block(block: bytes, perform_checksum: bool) -> np.ndarray:
