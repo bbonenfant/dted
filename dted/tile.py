@@ -162,6 +162,9 @@ class Tile:
         Warnings:
             VoidDataWarning: If void data is detected within the DTED file.
         """
+        if isinstance(self._data, np.ndarray) and self._data.size > 0:
+            # Data already loaded, no need to reload.
+            return
 
         # Open the file, seek to the data blocks, and start parsing.
         with self.file.open("rb") as f:
@@ -187,6 +190,11 @@ class Tile:
                 f"\n\t data carefully. VOID_DATA_VALUE={VOID_DATA_VALUE}",
                 category=VoidDataWarning,
             )
+
+    def unload_data(self) -> None:
+        """Unload the elevation memory from memory."""
+        del self._data
+        self._data = None
 
     def __contains__(self, item: LatLon) -> bool:
         """Determines whether a location is covered by the DTED file."""

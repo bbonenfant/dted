@@ -93,31 +93,35 @@ tile = Tile(dted_file, in_memory=False)
 assert LatLon(latitude=41.5, longitude=-70.25) in tile
 ```
 
-DTED batch processing is also available with the `dted.Tiles` class. The 
-Tiles class is a natural extension of the Tile class, allowing the user to 
-specify a directory of dted 1, 2 (or both) files to load into memory. The user
-can also specify which level of dted to load and if they are loaded in_memory
-or not.
+The `dted.TileSet` class allows you to query a collection of DTED data,
+i.e. a directory containing many DTED files.
 
 ```python
-from dted import Tiles, LatLon
+from dted import TileSet, LatLon
 
-tiles = Tiles(in_memory=False, dted_level=2)
-tiles.load_tiles_from_dir(r'test/data/')
+tiles = TileSet('test/data/')
+tiles.get_elevation(LatLon(latitude=41.5, longitude=-70.25))
+```
+
+No elevation data is loaded into memory when DTED sources are added to
+the TileSet. If you need access to the raw elevation data, then you
+must load the elevation data manually:
+
+```python
+from dted import TileSet, LatLon
+
+tiles = TileSet('test/data/')
+with tiles.get_tile(LatLon(41.5, -70.25)) as tile:
+  tile.data = 
 tile = tiles.get_tile(LatLon(latitude=41.5, longitude=-70.25))
-
-assert LatLon(latitude=41.5, longitude=-70.25) in tile
+tile.load_data()
+tile.data.max()
+tile.unload_data()
 ```
 
 You can also get the elevation directly from the Tiles class.
 
-```python
-from dted import Tiles, LatLon
 
-tiles = Tiles(in_memory=False, dted_level=2)
-tiles.load_tiles_from_dir(r'test/data/')
-tiles.get_elevation(LatLon(latitude=41.5, longitude=-70.25))
-```
 
 
 ## As a CLI
