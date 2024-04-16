@@ -134,9 +134,9 @@ def test_convert_signed_magnitude(signed_magnitude: int, twos_complement: int) -
     16 bit integers works as expected.
     """
     # Created non-writeable views to int16 arrays.
-    signed_magnitude_view = np.array([signed_magnitude], dtype=">i2").view()
+    signed_magnitude_view = np.array([signed_magnitude]).astype(">i2").view()
     signed_magnitude_view.setflags(write=False)
-    twos_complement_view = np.array([twos_complement], dtype=">i2")
+    twos_complement_view = np.array([twos_complement]).astype(">i2")
     twos_complement_view.setflags(write=False)
     assert dted.tile._convert_signed_magnitude(signed_magnitude_view) == twos_complement_view
     assert dted.tile._convert_signed_magnitude(twos_complement_view) == signed_magnitude_view
