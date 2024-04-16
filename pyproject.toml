@@ -19,7 +19,7 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = "^3.9"
-numpy = "^1.21"
+numpy = "^1.22"
 
 [tool.poetry.dev-dependencies]
 black = "^23.1"
