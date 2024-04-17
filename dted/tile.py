@@ -6,11 +6,13 @@ from typing import Optional, Union
 from warnings import warn as emit_warning
 
 import numpy as np
+import numpy.typing as npt
 
 from .definitions import ACC_SIZE, DSI_SIZE, UHL_SIZE, VOID_DATA_VALUE
 from .errors import InvalidFileError, NoElevationDataError, VoidDataWarning
 from .latlon import LatLon
 from .records import AccuracyDescription, DataSetIdentification, UserHeaderLabel
+
 
 _FilePath = Union[str, Path]
 _DATA_SENTINEL = 0xAA
@@ -93,7 +95,7 @@ class Tile:
                 the DTED file. Defaults to True.
         """
         self.file = Path(file)
-        self._data: Optional[np.ndarray] = None
+        self._data: Optional[npt.NDArray[np.int16]] = None
         self._warn = warn
 
         with self.file.open("rb") as f:
@@ -111,7 +113,7 @@ class Tile:
             return self._data
         raise ValueError("Data not loaded into memory. ")
 
-    def get_elevation(self, latlon: LatLon) -> float:
+    def get_elevation(self, latlon: LatLon) -> int:
         """Lookup the terrain elevation at the specified location.
 
         This will return the elevation of the explicitly defined DTED point
@@ -135,16 +137,18 @@ class Tile:
         longitude_index = round((latlon.longitude - origin_longitude) * (lon_count - 1))
 
         if self._data is not None:
-            return self._data[longitude_index, latitude_index]
+            return int(self._data[longitude_index, latitude_index])
 
         with self.file.open("rb") as f:
             block_length = self.dsi.data_block_length
             f.seek(UHL_SIZE + DSI_SIZE + ACC_SIZE + (longitude_index * block_length))
             data_block = _parse_data_block(f.read(block_length), perform_checksum=True)
             data_block = _convert_signed_magnitude(data_block)
-            return data_block[latitude_index]
+            return int(data_block[latitude_index])
 
-    def load_data(self, *, perform_checksum: bool = True, warn: bool = None) -> None:
+    def load_data(
+        self, *, perform_checksum: bool = True, warn: Optional[bool] = None
+    ) -> None:
         """Load the elevation data into memory.
 
         This loaded elevation data can be accessed through the `self.data` attribute.
@@ -200,7 +204,7 @@ class Tile:
         return within_latitude_band and within_longitude_band
 
 
-def _parse_data_block(block: bytes, perform_checksum: bool) -> np.ndarray:
+def _parse_data_block(block: bytes, perform_checksum: bool) -> npt.NDArray[np.int16]:
     """Parse an individual block of data.
 
     Args:
@@ -233,12 +237,12 @@ def _parse_data_block(block: bytes, perform_checksum: bool) -> np.ndarray:
     return np.frombuffer(block[8:-4], dtype=">i2")
 
 
-def _convert_signed_magnitude(data: np.ndarray) -> np.ndarray:
+def _convert_signed_magnitude(data: npt.NDArray[np.int16]) -> npt.NDArray[np.int16]:
     """Converts a numpy array of binary 16 bit integers between
     signed magnitude and 2's complement.
     """
     if not data.flags.writeable:
         data = data.copy()
     negatives = data < 0
-    data[negatives] = np.array(0x8000, dtype=">i2") - data[negatives]
+    data[negatives] = np.array(-32768).astype(">i2") - data[negatives]
     return data

@@ -67,7 +67,7 @@ def main() -> None:
             elevation = tile.get_elevation(location)
         except NoElevationDataError as err:
             error(str(err))
-        print(f"{elevation:.1f} meters")
+        print(f"{elevation} meters")
 
 
 def generate_chart(tile: Tile) -> str:
