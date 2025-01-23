@@ -168,12 +168,13 @@ class DataSetIdentification:
                 "DataSetIdentification section of the DTED file. "
             )
 
-        shape = (try_int(buffered_data.read(4)), try_int(buffered_data.read(4)))[::-1]
-        if shape[0] is None or shape[1] is None:
+        (nlat, nlon) = (try_int(buffered_data.read(4)), try_int(buffered_data.read(4)))
+        if nlat is None or nlon is None:
             raise InvalidFileError(
                 "The shape of the gridded data must be specified in the "
                 "DataSetIdentification section of the DTED file. "
             )
+        shape = (nlon, nlat)
 
         coverage = try_float(buffered_data.read(2))
         coverage = 1 if coverage == 0 else coverage

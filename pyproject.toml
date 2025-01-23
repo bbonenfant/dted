@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "dted"
-version = "1.1.0"
+version = "1.2.0"
 description = "Parser for DTED data."
 authors = ["Ben Bonenfant <bonenfan5ben@gmail.com>"]
 license = "MIT"
@@ -18,8 +18,8 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.9"
-numpy = "^1.22"
+python = "^3.10"
+numpy = ">=1.22"
 
 [tool.poetry.dev-dependencies]
 black = "^23.1"
@@ -37,12 +37,13 @@ target-version = ['py39', 'py310', 'py311']
 exclude = '\.git|\.idea|\.venv|\.\*cache|\*\.egg-info'
 
 [tool.mypy]
-python_version = "3.9"
+python_version = "3.10"
 mypy_path = "dted"
 ignore_errors = false
 ignore_missing_imports = true
 disallow_untyped_defs = true
 strict_optional = false
+plugins = "numpy.typing.mypy_plugin"
 
 [tool.pytest.ini_options]
 addopts = "-vv --black --mypy"

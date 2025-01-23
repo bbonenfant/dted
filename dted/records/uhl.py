@@ -86,12 +86,13 @@ class UserHeaderLabel:
         security_code = buffered_data.read(3)
         reference = buffered_data.read(12)
 
-        shape = try_int(buffered_data.read(4)), try_int(buffered_data.read(4))
-        if shape[0] is None or shape[1] is None:
+        (nlat, nlon) = try_int(buffered_data.read(4)), try_int(buffered_data.read(4))
+        if nlat is None or nlon is None:
             raise InvalidFileError(
                 "The shape of the gridded data must be specified in the "
                 "UserHeaderLabel section of the DTED file. "
             )
+        shape = (nlon, nlat)
 
         multiple_accuracy = buffered_data.read(1) != b"0"
         return cls(
