@@ -1,4 +1,5 @@
 """ Tests for dted/latlon.py """
+
 import pytest
 from typing import Tuple
 
