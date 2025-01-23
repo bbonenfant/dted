@@ -1,4 +1,5 @@
 """ Implementation of a DTED tile. """
+
 from dataclasses import astuple
 from pathlib import Path
 from struct import unpack

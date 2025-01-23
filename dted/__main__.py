@@ -1,4 +1,5 @@
 """ CLI to easily access DTED data from the command line. """
+
 import os
 import sys
 from argparse import ArgumentParser, RawTextHelpFormatter
