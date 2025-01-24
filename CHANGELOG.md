@@ -1,5 +1,14 @@
 # Change Log
 
+## v1.2.0 -- 2025-01-23
+
+Update project to support Python 3.13
+credit: [@amclauth](https://github.com/amclauth)
+
+- Drop support for Python 3.9
+- Fix some type hints
+- Add additional newly-discovered DTED source to README
+
 ## v1.1.0 -- 2024-04-16
 
 Update minimum python version to 3.9 and refresh project.

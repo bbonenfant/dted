@@ -208,6 +208,9 @@ However, you need to make an account with them in order to perform the
 download, and I'm unsure of a way to use their machine-to-machine API
 to automate downloading data.
 
+Additional public source of DTED files:
+    https://www.eorc.jaxa.jp/ALOS/en/dataset/aw3d30/aw3d30_e.htm
+
 ### Contributing
 
 Contributions are absolutely encouraged! To develop on this project you

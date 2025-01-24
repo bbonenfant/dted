@@ -1,4 +1,5 @@
 """ Implementation of a Latitude-Longitude coordinate. """
+
 from dataclasses import dataclass
 from typing import Tuple
 
