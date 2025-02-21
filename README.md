@@ -114,8 +114,6 @@ must load the elevation data manually:
 from dted import TileSet, LatLon
 
 tiles = TileSet('test/data/')
-with tiles.get_tile(LatLon(41.5, -70.25)) as tile:
-  tile.data = 
 tile = tiles.get_tile(LatLon(latitude=41.5, longitude=-70.25))
 tile.load_data()
 tile.data.max()

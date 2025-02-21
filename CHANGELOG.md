@@ -1,5 +1,15 @@
 # Change Log
 
+## v1.3.0 -- 2025-02-21
+
+Query sets of DTED tiles.
+credit: [@westonCoder](https://github.com/westonCoder)
+
+- Add a TileSet object to enable querying a collection of DTED file.
+  This collection can be multiple, individual files and/or directories.
+- Tile objects are now hashable and comparable.
+  Metadata objects (acc/dsi/uhl) are now frozen.
+
 ## v1.2.0 -- 2025-01-23
 
 Update project to support Python 3.13
