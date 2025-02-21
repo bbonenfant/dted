@@ -2,10 +2,11 @@
 
 import contextlib
 import os
+import zipfile
 from pathlib import Path
 from typing import Iterator, Optional, Set, Tuple
 
-from .definitions import _FilePath
+from .definitions import _DtedSource, _PathZ
 from .errors import InvalidFileError, NoElevationDataError
 from .latlon import LatLon
 from .tile import Tile
@@ -62,12 +63,16 @@ class TileSet:
     """
 
     def __init__(
-        self, *sources: _FilePath, suffixes: Optional[Tuple[str]] = None, warn: bool = True
+        self,
+        *sources: _DtedSource,
+        suffixes: Optional[Tuple[str]] = None,
+        warn: bool = True,
     ):
         """
         Args:
             sources: One of more sources of DTED files.
-                This can be a path to DTED file or to a directory containing DTED files.
+                This can be a path to DTED file, a directory containing DTED files
+                or a zipfile.Zipfile object of DTED files.
             suffix: A tuple of file extensions used to filter files within the
                 source, i.e. ".dt1". If no suffixes are provided, all files are parsed
                 and non-DTED files are silently ignored.
@@ -81,23 +86,43 @@ class TileSet:
             self.include(source, suffixes)
 
     @property
-    def files(self) -> Set[Path]:
+    def files(self) -> Set[_PathZ]:
         return set(tile.file for tile in self.tiles)
 
-    def include(self, source: _FilePath, suffixes: Optional[Tuple[str]] = None) -> None:
+    def include(self, source: _DtedSource, suffixes: Optional[Tuple[str]] = None) -> None:
         """Include a new source within the TileSet.
 
         Args:
             source: A source of DTED files.
-                This can be a path to DTED file or to a directory containing DTED files.
+                This can be a path to DTED file, a directory containing DTED files
+                or a zipfile.Zipfile object of DTED files.
             suffixes: A tuple of file extensions used to filter files within the
                 source, i.e. ".dt1". If no suffixes are provided, all files are parsed
                 and non-DTED files are silently ignored.
         """
+        suffixes = suffixes or self.suffixes
+        if isinstance(source, zipfile.ZipFile):
+            for zipinfo in source.infolist():
+                if not zipinfo.is_dir():
+                    self._include_file(zipfile.Path(source, zipinfo.filename), suffixes)
+            return
+
+        if isinstance(source, zipfile.Path):
+            if source.is_file():
+                self._include_file(source, suffixes)
+            return
+
         source = Path(source)
         if not source.exists():
             raise ValueError(f"source does not exist: {source}")
-        self._include_source(source, suffixes or self.suffixes)
+
+        if source.is_file():
+            self._include_file(source, suffixes)
+            return
+
+        for root, _dirs, files in os.walk(source):
+            for file in files:
+                self._include_file(Path(root, file), suffixes)
 
     def get_elevation(self, latlon: LatLon) -> float:
         """Lookup the terrain elevation at the specified location.
@@ -151,23 +176,7 @@ class TileSet:
             raise TypeError(f"Expected LatLon -- Found: {item}")
         return any(item in tile for tile in self.tiles)
 
-    def _include_source(self, source: Path, suffixes: Tuple[str]) -> None:
-        """
-        Args:
-            source: A DTED file or a directory containing DTED files.
-            suffixes: A tuple of file extensions used to filter files within the
-                source, i.e. ".dt1". If no suffixes are provided, all files are parsed
-                and non-DTED files are silently ignored.
-        """
-        if source.is_file():
-            self._include_file(source, suffixes)
-            return
-
-        for root, _dirs, files in os.walk(source):
-            for file in files:
-                self._include_file(Path(root, file), suffixes)
-
-    def _include_file(self, file: Path, suffixes: Tuple[str]) -> None:
+    def _include_file(self, file: _PathZ, suffixes: Tuple[str]) -> None:
         """
         Args:
             file: A DTED file.
@@ -179,6 +188,7 @@ class TileSet:
             with contextlib.suppress(InvalidFileError):
                 tile = Tile(file, in_memory=False, warn=self.warn)
                 self.tiles.add(tile)
-        if file.suffix in suffixes:
+        suffix = file.suffix if hasattr(file, "suffix") else Path(file.name).suffix
+        if suffix in suffixes:
             tile = Tile(file, in_memory=False, warn=self.warn)
             self.tiles.add(tile)
