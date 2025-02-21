@@ -1,5 +1,8 @@
 """Tests for the TileSet class."""
 
+import io
+import zipfile
+
 import pytest
 
 from dted import LatLon, TileSet
@@ -49,5 +52,26 @@ def test_load_and_unload_tile() -> None:
     tiles = TileSet(TEST_DATA_DIR)
     tile = tiles.get_tile(LatLon(latitude=41.5, longitude=-70.25))
     tile.load_data()
-    tile.data.max()
+    assert tile.data.max()
+    tile.unload_data()
+
+
+def test_zipfile() -> None:
+    memory = io.BytesIO()
+    with zipfile.ZipFile(memory, "w") as zf:
+        for file in TEST_DATA_DIR.iterdir():
+            zf.write(file, file.name)
+    memory.seek(0)
+
+    dted_zip = zipfile.ZipFile(memory)
+    tileset = TileSet(dted_zip)
+    assert len(tileset.tiles) == 3
+
+    zip_path = zipfile.Path(dted_zip, dted_zip.namelist()[0])
+    tileset.include(zip_path)
+    assert len(tileset.tiles) == 3, "should be a duplicate Tile"
+
+    tile = tileset.get_tile(LatLon(latitude=41.5, longitude=-70.25))
+    tile.load_data()
+    assert tile.data.max()
     tile.unload_data()

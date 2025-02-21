@@ -47,9 +47,10 @@ def main() -> None:
         ),
     )
     args = parser.parse_args()
+    file = Path(args.file)
 
     try:
-        tile = Tile(args.file, in_memory=False)
+        tile = Tile(file, in_memory=False)
     except FileNotFoundError:
         error(f"DTED file not found: {args.file}")
     except InvalidFileError as err:
@@ -58,7 +59,7 @@ def main() -> None:
     if args.display:
         print(generate_chart(tile))
     elif args.location is None:
-        print(generate_report(tile))
+        print(generate_report(tile, file))
     else:
         try:
             location = LatLon(*args.location)
@@ -121,7 +122,7 @@ def generate_chart(tile: Tile) -> str:
     )
 
 
-def generate_report(tile: Tile) -> str:
+def generate_report(tile: Tile, file: Path) -> str:
     """Generate a pretty-printed high-level report on the provided DTED tile."""
     # Preformat some data.
     compilation_date = ""
@@ -140,7 +141,7 @@ def generate_report(tile: Tile) -> str:
     # Generate the report.
     return "\n".join(
         [
-            f"File Path:          {tile.file} ({tile.file.stat().st_size >> 20} MB)",
+            f"File Path:          {tile.file} ({file.stat().st_size >> 20} MB)",
             f"Product Level:      {tile.dsi.product_level}",
             f"Security Code:      {tile.dsi.security_code}",
             f"Compilation Date:   {compilation_date}",

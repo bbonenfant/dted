@@ -3,19 +3,18 @@
 from dataclasses import astuple
 from pathlib import Path
 from struct import unpack
-from typing import Optional, Union
+from typing import Optional
 from warnings import warn as emit_warning
 
 import numpy as np
 import numpy.typing as npt
 
-from .definitions import ACC_SIZE, DSI_SIZE, UHL_SIZE, VOID_DATA_VALUE
+from .definitions import ACC_SIZE, DSI_SIZE, UHL_SIZE, VOID_DATA_VALUE, _FilePath, _PathZ
 from .errors import InvalidFileError, NoElevationDataError, VoidDataWarning
 from .latlon import LatLon
 from .records import AccuracyDescription, DataSetIdentification, UserHeaderLabel
 
 
-_FilePath = Union[str, Path]
 _DATA_SENTINEL = 0xAA
 
 
@@ -95,7 +94,7 @@ class Tile:
             warn: Whether to emit the warning if void data is detected within
                 the DTED file. Defaults to True.
         """
-        self.file = Path(file)
+        self.file: _PathZ = Path(file) if isinstance(file, str) else file
         self._data: Optional[npt.NDArray[np.int16]] = None
         self._warn = warn
 

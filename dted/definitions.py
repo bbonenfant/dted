@@ -2,6 +2,7 @@
 
 from pathlib import Path
 from typing import Union
+import zipfile
 
 # Definitions of DTED Record lengths.
 UHL_SIZE = 80
@@ -12,5 +13,7 @@ ACC_SIZE = 2700
 VOID_DATA_VALUE = (-1 << 15) + 1
 
 
-_FilePath = Union[str, Path]
+_PathZ = Union[Path, zipfile.Path]
+_FilePath = Union[str, _PathZ]
+_DtedSource = Union[_FilePath, zipfile.ZipFile]
 _UTF8 = "utf-8"
