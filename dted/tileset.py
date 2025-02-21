@@ -1,4 +1,5 @@
 """API for a collection of DTED tiles."""
+
 import contextlib
 import os
 from pathlib import Path
@@ -60,7 +61,9 @@ class TileSet:
         125
     """
 
-    def __init__(self, *sources: _FilePath, suffixes: Optional[Tuple[str]] = None, warn: bool = True):
+    def __init__(
+        self, *sources: _FilePath, suffixes: Optional[Tuple[str]] = None, warn: bool = True
+    ):
         """
         Args:
             sources: One of more sources of DTED files.
@@ -72,7 +75,7 @@ class TileSet:
                 the DTED file. Defaults to True.
         """
         self.suffixes: Tuple[str] = suffixes or tuple()
-        self.tiles = set()
+        self.tiles: Set[Tile] = set()
         self.warn = warn
         for source in sources:
             self.include(source, suffixes)
@@ -162,8 +165,7 @@ class TileSet:
 
         for root, _dirs, files in os.walk(source):
             for file in files:
-                file = Path(root, file)
-                self._include_file(file, suffixes)
+                self._include_file(Path(root, file), suffixes)
 
     def _include_file(self, file: Path, suffixes: Tuple[str]) -> None:
         """

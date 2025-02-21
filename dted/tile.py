@@ -212,8 +212,8 @@ class Tile:
         within_longitude_band = minimum_longitude <= item.longitude <= maximum_longitude
         return within_latitude_band and within_longitude_band
 
-    def __eq__(self, other: "Tile") -> bool:
-        return hash(self) == hash(other)
+    def __eq__(self, other: object) -> bool:
+        return isinstance(other, Tile) and (hash(self) == hash(other))
 
     def __hash__(self) -> int:
         """The hash of a Tile is set by the hash of the file metadata.

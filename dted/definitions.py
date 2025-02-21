@@ -1,4 +1,5 @@
 """ Definitions used to parse DTED files. """
+
 from pathlib import Path
 from typing import Union
 
