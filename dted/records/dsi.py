@@ -13,7 +13,7 @@ from ..latlon import LatLon
 _SENTINEL = b"DSI"
 
 
-@dataclass
+@dataclass(frozen=True)
 class DataSetIdentification:
     # noinspection PyUnresolvedReferences
     """Dataclass holding the contents of the Data Set Identification section of a DTED file.
@@ -217,6 +217,9 @@ class DataSetIdentification:
         within the Data Record of the DTED file containing this DSI record.
         """
         return 12 + (2 * self.shape[1])
+
+    def __hash__(self) -> int:
+        return hash(self._data)
 
 
 def parse_month_date(date_str: str) -> Optional[date]:

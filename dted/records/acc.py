@@ -11,7 +11,7 @@ from ..errors import InvalidFileError
 _SENTINEL = b"ACC"
 
 
-@dataclass
+@dataclass(frozen=True)
 class AccuracyDescription:
     # noinspection PyUnresolvedReferences
     """Dataclass holding the contents of the Data Set Identification section of a DTED file.
@@ -64,3 +64,6 @@ class AccuracyDescription:
             relative_vertical=relative_vertical,
             _data=data,
         )
+
+    def __hash__(self) -> int:
+        return hash(self._data)
